@@ -4,27 +4,33 @@ const webpack = require('webpack');
 const path = require('path');
 const env = require('yargs').argv.env; // use --env with webpack 2
 const pkg = require('./package.json');
+const HTMLWebpackPlugin = require('html-webpack-plugin')
 
-let libraryName = pkg.name;
-
-let outputFile, mode;
+let extension, mode;
 
 if (env === 'build') {
   mode = 'production';
-  outputFile = libraryName + '.min.js';
+  extension = '.min.js';
 } else {
   mode = 'development';
-  outputFile = libraryName + '.js';
+  extension = '.js';
 }
 
 const config = {
   mode: mode,
-  entry: __dirname + '/src/index.js',
+  entry: {
+    'sandbox': __dirname + '/src/sandbox.js',
+    'aframe-seeclarke': __dirname + '/src/index.js'
+  },
   devtool: 'source-map',
+  devServer: {
+    contentBase: path.join(__dirname, 'lib'),
+    port: 8080
+  },
   output: {
     path: __dirname + '/lib',
-    filename: outputFile,
-    library: libraryName,
+    filename: `[name]${extension}`,
+    library: pkg.name,
     libraryTarget: 'umd',
     umdNamedDefine: true
   },
@@ -42,6 +48,12 @@ const config = {
       }
     ]
   },
+  plugins: [
+    new HTMLWebpackPlugin({
+      template: 'src/sandbox.html',
+      inject: 'head'
+    })
+  ],
   resolve: {
     modules: [path.resolve('./node_modules'), path.resolve('./src')],
     extensions: ['.json', '.js']
