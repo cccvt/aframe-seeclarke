@@ -9,9 +9,12 @@ window.AFRAME.registerComponent('headtracking', {
   seeclarke: null,
   // The pointer reference
   $pointer: null,
+  // The camera reference
+  $camera: null,
 
   init () {
     this.seeclarke = new SeeClarke({debug: false})
+
     this.addPointer()
     this.addSeeClarkeToggle()
     this.listen()
@@ -61,12 +64,14 @@ window.AFRAME.registerComponent('headtracking', {
   /**
    * Toggles SeeClarke
    * - [ ] Start/stops when the button is clicked
+   * - [ ] Grabs the camera
    */
   toggleSeeClarke () {
     if (this.seeclarke._isTracking) {
       this.seeclarke.stop()
       this.$pointer.style.display = 'none'
     } else {
+      this.$camera = document.querySelector('a-entity[camera]')
       this.seeclarke.start()
       this.$pointer.style.display = 'block'
     }
@@ -87,10 +92,27 @@ window.AFRAME.registerComponent('headtracking', {
       poses.forEach((pose, index) => {
         let x = pose.pointedAt.x
         let y = pose.pointedAt.y
+        let rotation = this.$camera.getAttribute('rotation')
 
         // Then add the points to the cursor!
         this.$pointer.style.left = x + 'px'
         this.$pointer.style.top = y + 'px'
+
+        // Update POV
+        if (y < 0) {
+          rotation.x -= y * 0.0025
+        } else if (y > window.innerHeight) {
+          rotation.x -= (y - window.innerHeight) * 0.0025
+        }
+        if (x < 0) {
+          rotation.y -= x * 0.0025
+        } else if (x > window.innerWidth) {
+          rotation.y -= (x - window.innerWidth) * 0.0025
+        }
+
+        if (x < 0 || y < 0 || x > window.innerHeight || y > window.innerHeight) {
+          this.$camera.setAttribute('rotation', rotation)
+        }
       })
     })
   }
