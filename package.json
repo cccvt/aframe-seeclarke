@@ -45,5 +45,8 @@
     "webpack-cli": "^3.0.8",
     "webpack-dev-server": "^3.1.5",
     "yargs": "^10.0.3"
+  },
+  "dependencies": {
+    "seeclarke": "^1.1.2"
   }
 }
